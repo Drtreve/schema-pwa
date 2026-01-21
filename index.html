@@ -361,8 +361,11 @@
     const d = new Date(dateObj);
     const dow = (d.getDay()+6)%7; // monday=0
     d.setDate(d.getDate()-dow);
+    d.setHours(0,0,0,0);
     const start = new Date(d);
-    const end = new Date(d); end.setDate(end.getDate()+6);
+    const end = new Date(d);
+    end.setDate(end.getDate()+6);
+    end.setHours(23,59,59,999);
     return [start,end];
   }
 
@@ -414,12 +417,20 @@ function renderCalendar(){
     }
 
     const p = passMap[key];
-    const passText = p ? `${p.start}–${p.end}` : "";
-    const label = (st==="sick") ? "Sjuk" : (st==="vab") ? "VAB" : (p ? passText : "");
+
+    let chipHTML = "";
+    if(st==="sick"){
+      chipHTML = `<div class="chip status">Sjuk</div>`;
+    } else if(st==="vab"){
+      chipHTML = `<div class="chip status">VAB</div>`;
+    } else if(p && p.start && p.end){
+      // Två rader så det alltid syns på iPhone
+      chipHTML = `<div class="chip time"><span>${p.start}</span><span>${p.end}</span></div>`;
+    }
 
     cell.innerHTML = `
       <div class="d">${dayNum}</div>
-      ${label ? `<div class="chip">${label}</div>` : `<div></div>`}
+      ${chipHTML || `<div></div>`}
     `;
 
     cell.onclick = () => openSheet(key);
@@ -430,6 +441,9 @@ function renderCalendar(){
 
   function openSheet(key){
     selectedDate = key;
+    // Uppdatera topptotaler för veckan som den valda dagen ligger i
+    updateTopTotals();
+    updateSummary();
     const d = new Date(key+"T00:00:00");
     document.getElementById("sheetTitle").textContent =
       `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()].toLowerCase()}`;
@@ -521,6 +535,17 @@ function renderCalendar(){
   }
 
   // ✅ Top: Jobbat + Planerat (vecka/månad)
+  function getWeekBaseDate(){
+    // Prioritet: vald dag (om den är i aktuell månad) → idag (om i aktuell månad) → 1:a i månaden
+    if(selectedDate){
+      const sd = new Date(selectedDate+"T00:00:00");
+      if(sd.getFullYear()===currentYear && sd.getMonth()===currentMonth) return sd;
+    }
+    const today = new Date();
+    if(today.getFullYear()===currentYear && today.getMonth()===currentMonth) return today;
+    return new Date(currentYear,currentMonth,1);
+  }
+
   function updateTopTotals(){
     const statusMap = loadStatus();
     const passMap = loadPassMap();
@@ -528,9 +553,7 @@ function renderCalendar(){
     let monthWorked = 0, monthPlanned = 0;
     let weekWorked = 0, weekPlanned = 0;
 
-    const today = new Date();
-    const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth)
-      ? today : new Date(currentYear,currentMonth,1);
+    const base = getWeekBaseDate();
     const [ws,we] = weekRangeFor(base);
     const weekNo = isoWeekNumber(base);
     document.getElementById("weekMeta").textContent = `v. ${weekNo}`;
@@ -587,9 +610,7 @@ function renderCalendar(){
     } else if(sumTab==="year"){
       keys = keys.filter(k => k.startsWith(`${currentYear}-`));
     } else {
-      const today = new Date();
-      const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth)
-        ? today : new Date(currentYear,currentMonth,1);
+      const base = getWeekBaseDate();
       const [ws,we] = weekRangeFor(base);
       keys = keys.filter(k=>{
         const d = new Date(k+"T00:00:00");
