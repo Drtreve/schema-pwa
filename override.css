@@ -28,35 +28,51 @@ body{
   gap: 10px !important;
 }
 
-/* Fyrkantiga rutor som alltid blir lika stora */
 .day{
-  aspect-ratio: 1 / 1 !important;
-  min-height: 52px !important;
-  padding: 10px 10px 8px !important;
-  border-radius: 14px !important;
-  box-shadow: 0 1px 0 rgba(0,0,0,.02) !important;
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+  border:1px solid #eef1f5;
+
+  /* ✅ tydlig ruta för varje dag */
+  aspect-ratio: 1 / 1;
+  min-height: 54px;
+
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
-/* Datum snyggare */
-.day .d{
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  color: #0f172a !important;
-}
-
-/* Pass-chip ska aldrig spräcka layouten */
-.chip{
-  margin-top: 8px !important;
-  font-size: 10px !important;
-  padding: 6px 8px !important;
-  border-radius: 999px !important;
-  max-width: 100% !important;
-}
-
-/* Dämpa “muted” rutor */
 .day.muted{
-  opacity: .18 !important;
+  background:#f6f7fb;
+  border-color:#eef1f5;
+  opacity: 1; /* ✅ inte “försvinner” */
 }
+
+.day .d{
+  font-size:12px;
+  font-weight:900;
+  color:#0f172a;
+}
+
+.passline{
+  font-size:10px;
+  font-weight:900;
+  color:#0b3b7a;
+  background:#e9f2ff;
+  padding:6px 8px;
+  border-radius:999px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* Status */
+.day.done{ border-color:#8fd2a0; }
+.day.done .passline{ background:#e7f6ea; color:#1b5e20; }
+
+.day.sick{ border-color:#f1a3a3; }
+.day.sick .passline{ background:#fde8e8; color:#7f1d1d; }
 
 /* Gör så att hela appen inte får konstiga tomma marginaler på desktop */
 @media (min-width: 900px){
