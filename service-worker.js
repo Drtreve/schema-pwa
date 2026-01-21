@@ -1,7 +1,8 @@
-self.addEventListener('install', e => {
+self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('schema-v1').then(cache =>
-      cache.addAll(['./', './index.html'])
+    caches.open('schema-v2').then((cache) =>
+      cache.addAll(['./', './index.html', './manifest.json'])
     )
   );
 });
+
