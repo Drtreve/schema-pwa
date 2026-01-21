@@ -31,25 +31,25 @@ body{
 .day{
   background:#fff;
   border-radius:14px;
-  padding:10px;
+  /* Mindre padding så att tid/status får plats i små rutor på iPhone */
+  padding:8px 7px 7px;
   border:1px solid #eef1f5;
 
-  /* ✅ iOS/Safari fix:
-     Grid-items har default min-width:auto vilket gör att innehåll (t.ex. en chip med nowrap)
-     kan tvinga kolumnen att bli bredare → kalendern “sticker ut” åt höger.
-     min-width:0 låter cellen krympa och ellipsis fungerar korrekt.
-  */
+  /* ✅ iOS/Safari fix: låt grid-items krympa */
   min-width: 0;
   overflow: hidden;
 
-  /* ✅ tydlig ruta för varje dag */
   aspect-ratio: 1 / 1;
   min-height: 54px;
 
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:4px;
 }
+@media (max-width: 420px){
+  .day{ padding:7px 6px 6px; gap:3px; }
+}
+
 
 .day.muted{
   background:#f6f7fb;
@@ -64,18 +64,27 @@ body{
 }
 
 .chip{
+  /* margin-top fanns i bas-CSS och gör att chip lätt hamnar utanför rutan på iPhone */
+  margin-top:0 !important;
+
   font-size:10px;
+  line-height:1.1;
   font-weight:900;
   color:#0b3b7a;
   background:#e9f2ff;
-  padding:6px 8px;
+  padding:5px 7px;
   border-radius:999px;
+
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
   max-width: 100%;
   min-width: 0;
 }
+@media (max-width: 420px){
+  .chip{ font-size:9px; padding:4px 6px; }
+}
+
 
 /* Status */
 .day.done{ border-color:#8fd2a0; }
