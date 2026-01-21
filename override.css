@@ -1,0 +1,79 @@
+/* override.css – layout polish */
+
+/* Gör appen mer “mobil-app” även på desktop */
+body{
+  background:#e9edf3 !important;
+}
+
+/* Centrerad container med bättre proportioner */
+.app{
+  max-width: 430px !important;     /* mer iPhone-känsla */
+  margin: 0 auto !important;
+  background: #f2f4f7 !important;
+}
+
+/* Topbar lite tajtare och renare */
+.topbar{
+  border-bottom-left-radius: 24px !important;
+  border-bottom-right-radius: 24px !important;
+}
+
+/* Kalenderkort ska fylla bredden och inte kännas “smalt” */
+#viewCalendar .card{
+  width: 100% !important;
+}
+
+/* ✅ Viktigast: gör grid stabil och rutorna lika */
+.grid{
+  gap: 10px !important;
+}
+
+/* Fyrkantiga rutor som alltid blir lika stora */
+.day{
+  aspect-ratio: 1 / 1 !important;
+  min-height: 52px !important;
+  padding: 10px 10px 8px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) !important;
+}
+
+/* Datum snyggare */
+.day .d{
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+}
+
+/* Pass-chip ska aldrig spräcka layouten */
+.chip{
+  margin-top: 8px !important;
+  font-size: 10px !important;
+  padding: 6px 8px !important;
+  border-radius: 999px !important;
+  max-width: 100% !important;
+}
+
+/* Dämpa “muted” rutor */
+.day.muted{
+  opacity: .18 !important;
+}
+
+/* Gör så att hela appen inte får konstiga tomma marginaler på desktop */
+@media (min-width: 900px){
+  .app{
+    margin-top: 24px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.12) !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Bottom nav alltid snygg och fast */
+.nav{
+  max-width: 430px !important;
+}
+
+/* Sheet (dagvy) alltid alignad */
+.sheet{
+  max-width: 430px !important;
+}
