@@ -323,8 +323,6 @@ function renderCalendar(){
 
   const passMap = loadPassMap();
   const statusMap = loadStatus();
-
-  // ✅ alltid 42 rutor
   const totalCells = 42;
 
   for(let idx=0; idx<totalCells; idx++){
@@ -333,7 +331,7 @@ function renderCalendar(){
 
     const dayNum = idx - firstDow + 1;
 
-    // tomma rutor (före/efter månaden) får egen ruta men inget datum
+    // ✅ tomma rutor (före/efter månaden) ska ändå synas som rutor
     if(dayNum < 1 || dayNum > daysInMonth){
       cell.classList.add("muted");
       cell.innerHTML = `<div class="d"></div><div></div>`;
@@ -347,6 +345,12 @@ function renderCalendar(){
     const st = statusMap[key] || "planned";
     if(st==="done") cell.classList.add("done");
     if(st==="sick") cell.classList.add("sick");
+
+    // (valfritt) markera idag
+    const today = new Date();
+    if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===dayNum){
+      cell.classList.add("today");
+    }
 
     const p = passMap[key];
     const passText = p ? `${p.start}–${p.end}` : "";
