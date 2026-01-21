@@ -9,16 +9,20 @@
   <meta name="theme-color" content="#1976d2">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Schema">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
 
   <style>
     :root{
       --blue:#1976d2; --bg:#f2f4f7; --card:#fff; --text:#0b1220;
       --muted:#6b7280; --green:#2e7d32; --red:#d32f2f;
+      --orange:#f59e0b;
       --radius:16px;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
-    .app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:78px}
+    .app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:calc(78px + env(safe-area-inset-bottom))}
 
     .topbar{
       background:var(--blue);color:#fff;padding:14px 16px 12px;
@@ -34,6 +38,8 @@
     .pill .label{font-size:12px;opacity:.95;font-weight:800}
     .pill .value{font-size:22px;font-weight:950;margin-top:2px}
     .pill .sub{font-size:12px;opacity:.95;margin-top:4px}
+
+    .pill .sub .meta{opacity:.92}
 
     .dow{font-size:12px;color:rgba(255,255,255,.92);display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:12px}
     .dow div{text-align:center;font-weight:800;opacity:.95}
@@ -89,6 +95,8 @@
     .day.done .chip{ background:#e7f6ea; color:#1b5e20; }
     .day.sick{ border-color:#f1a3a3; }
     .day.sick .chip{ background:#fde8e8; color:#7f1d1d; }
+    .day.vab{ border-color:#f7c37a; }
+    .day.vab .chip{ background:#fff3d6; color:#7a4a00; }
     .day.today{ box-shadow:0 0 0 3px rgba(25,118,210,.18); }
 
     .hint{font-size:12px;color:var(--muted);margin-top:10px}
@@ -98,7 +106,7 @@
       max-width:420px;margin:0 auto;background:#fff;border-top-left-radius:22px;border-top-right-radius:22px;
       box-shadow:0 -20px 60px rgba(0,0,0,.18);padding:10px 14px 16px;
     }
-    .sheet.open{bottom:70px}
+    .sheet.open{bottom:calc(70px + env(safe-area-inset-bottom, 0px))}
     .sheethead{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
     .back{font-weight:950;color:var(--blue);cursor:pointer}
     .sheettitle{font-weight:950;text-align:center;flex:1}
@@ -115,6 +123,11 @@
     .btn.blue{background:var(--blue);color:#fff}
     .btn.gray{background:#eef1f5;color:#223}
 
+    .btnrow{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+    .btn.small{padding:12px 12px;font-size:15px;margin-top:0}
+    .btn.outline{background:#fff;border:2px solid #e5e7eb;color:#223}
+    .btn.outline.active{border-color:var(--blue);box-shadow:0 0 0 3px rgba(25,118,210,.12)}
+
     .tabs{display:flex;gap:10px;background:#eef3fb;border-radius:999px;padding:6px}
     .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:950;color:#335;cursor:pointer}
     .tab.active{background:var(--blue);color:#fff}
@@ -127,7 +140,8 @@
 
     .nav{
       position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e9edf2;
-      max-width:420px;margin:0 auto;display:flex;gap:8px;justify-content:space-around;padding:10px 10px 14px;
+      max-width:420px;margin:0 auto;display:flex;gap:8px;justify-content:space-around;
+      padding:10px 10px calc(14px + env(safe-area-inset-bottom, 0px));
     }
     .nav button{border:0;background:transparent;font-weight:950;color:#64748b;cursor:pointer}
     .nav button.active{color:var(--blue)}
@@ -140,6 +154,7 @@
     <div class="toprow">
       <div class="title" id="monthTitle">Februari 2026</div>
       <div class="navarrows">
+        <div class="arrow" onclick="goToday()">Idag</div>
         <div class="arrow" onclick="prevMonth()">‹</div>
         <div class="arrow" onclick="nextMonth()">›</div>
       </div>
@@ -149,7 +164,7 @@
       <div class="pill">
         <div class="label">Denna vecka</div>
         <div class="value" id="weekWorked">0 h</div>
-        <div class="sub">Planerat: <strong id="weekPlanned">0 h</strong></div>
+        <div class="sub"><span class="meta" id="weekMeta">v. –</span> · Planerat: <strong id="weekPlanned">0 h</strong></div>
       </div>
       <div class="pill">
         <div class="label">Denna månad</div>
@@ -204,7 +219,29 @@
     <div id="viewSettings" style="display:none">
       <div class="card sumcard">
         <div class="sumtitle">Inställningar</div>
-        <div class="hint">(sen) Export/Import, standardrast, osv.</div>
+        <div class="badge blue" style="margin-top:12px">
+          <div style="font-weight:950">⏱️ Standardrast</div>
+          <div>
+            <input class="input" style="width:90px" id="sDefaultBreak" type="number" min="0" step="5" value="30" />
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          Standardrasten används när du öppnar en ny dag som inte redan har ett pass.
+        </div>
+
+        <div style="margin-top:14px">
+          <button class="btn gray" onclick="exportData()">📤 Exportera data (JSON)</button>
+          <label class="btn gray" style="display:block;text-align:center">
+            📥 Importera data (JSON)
+            <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importData(event)" />
+          </label>
+          <button class="btn red" onclick="resetAll()">🧨 Nollställ allt</button>
+        </div>
+
+        <div class="hint" style="margin-top:10px">
+          Tips: exportera ibland för backup.
+        </div>
       </div>
     </div>
   </div>
@@ -238,9 +275,15 @@
   </div>
 
   <button class="btn gray" onclick="savePass()">💾 Spara pass</button>
-  <button class="btn green" onclick="mark('done')">✅ Klar/Gjord</button>
-  <button class="btn red" onclick="mark('sick')">🟥 Sjuk / VAB</button>
-  <button class="btn blue" onclick="mark('planned')">Återställ till planerad</button>
+
+  <div class="btnrow">
+    <button class="btn small outline" id="btnPlanned" onclick="mark('planned')">📌 Planerad</button>
+    <button class="btn small outline" id="btnDone" onclick="mark('done')">✅ Klar/Gjord</button>
+    <button class="btn small outline" id="btnSick" onclick="mark('sick')">🟥 Sjuk</button>
+    <button class="btn small outline" id="btnVab" onclick="mark('vab')">🟧 VAB</button>
+  </div>
+
+  <button class="btn blue" onclick="clearDay()">🗑️ Ta bort dag (pass + status)</button>
 </div>
 
 <!-- Bottom nav -->
@@ -260,6 +303,8 @@
   function savePassMap(m){ localStorage.setItem("passMap", JSON.stringify(m)); }
   function loadStatus(){ return JSON.parse(localStorage.getItem("statusMap") || "{}"); }
   function saveStatus(m){ localStorage.setItem("statusMap", JSON.stringify(m)); }
+  function loadSettings(){ return JSON.parse(localStorage.getItem("settings") || '{"defaultBreak":30}'); }
+  function saveSettings(s){ localStorage.setItem("settings", JSON.stringify(s)); }
 
   function minutesBetween(start, end){
     const [sh,sm] = start.split(":").map(Number);
@@ -276,19 +321,20 @@
   }
   function fmtH(h){ return (h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)) + " h"; }
 
-  let currentYear = 2026;
-  let currentMonth = 1; // Feb
+  const _now = new Date();
+  let currentYear = _now.getFullYear();
+  let currentMonth = _now.getMonth();
   let selectedDate = null;
   let sumTab = "week";
 
-  // Exempel-pass (kan ersättas av er manuellt / import senare)
-  const example = {
-    "2026-02-02": {start:"16:00", end:"21:00", breakMin:0},
-    "2026-02-03": {start:"14:00", end:"20:00", breakMin:30},
-    "2026-02-04": {start:"07:00", end:"14:00", breakMin:30},
-    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30}
-  };
-  (function seed(){
+  // Demo-data (lägg till ?demo=1 i URL om du vill fylla på exempelpass)
+  (function seedDemo(){
+    if(!location.search.includes("demo=1")) return;
+    const example = {
+      [ymd(new Date(currentYear,currentMonth,2))]: {start:"16:00", end:"21:00", breakMin:0},
+      [ymd(new Date(currentYear,currentMonth,3))]: {start:"14:00", end:"20:00", breakMin:30},
+      [ymd(new Date(currentYear,currentMonth,4))]: {start:"07:00", end:"14:00", breakMin:30}
+    };
     const m = loadPassMap();
     let changed = false;
     for(const k in example){
@@ -296,6 +342,14 @@
     }
     if(changed) savePassMap(m);
   })();
+
+  function isoWeekNumber(d){
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  }
 
   function weekRangeFor(dateObj){
     const d = new Date(dateObj);
@@ -345,6 +399,7 @@ function renderCalendar(){
     const st = statusMap[key] || "planned";
     if(st==="done") cell.classList.add("done");
     if(st==="sick") cell.classList.add("sick");
+    if(st==="vab") cell.classList.add("vab");
 
     // (valfritt) markera idag
     const today = new Date();
@@ -354,10 +409,11 @@ function renderCalendar(){
 
     const p = passMap[key];
     const passText = p ? `${p.start}–${p.end}` : "";
+    const label = (st==="sick") ? "Sjuk" : (st==="vab") ? "VAB" : (p ? passText : "");
 
     cell.innerHTML = `
       <div class="d">${dayNum}</div>
-      ${p ? `<div class="passline">${passText}</div>` : `<div></div>`}
+      ${label ? `<div class="chip">${label}</div>` : `<div></div>`}
     `;
 
     cell.onclick = () => openSheet(key);
@@ -373,13 +429,15 @@ function renderCalendar(){
       `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()].toLowerCase()}`;
 
     const passMap = loadPassMap();
-    const p = passMap[key] || {start:"", end:"", breakMin:30};
+    const settings = loadSettings();
+    const p = passMap[key] || {start:"", end:"", breakMin:settings.defaultBreak ?? 30};
 
     document.getElementById("iStart").value = p.start || "";
     document.getElementById("iEnd").value = p.end || "";
     document.getElementById("iBreak").value = (p.breakMin ?? 30);
 
     recalcPaid();
+    syncStatusButtons();
     document.getElementById("sheet").classList.add("open");
   }
   function closeSheet(){ document.getElementById("sheet").classList.remove("open"); }
@@ -405,6 +463,13 @@ function renderCalendar(){
     else passMap[selectedDate] = {start:s, end:e, breakMin:b};
     savePassMap(passMap);
 
+    // Om man sparar ett pass på en tom dag: se till att status är minst "planned"
+    const statusMap = loadStatus();
+    if(!statusMap[selectedDate]){
+      statusMap[selectedDate] = "planned";
+      saveStatus(statusMap);
+    }
+
     render();
   }
 
@@ -412,6 +477,38 @@ function renderCalendar(){
     if(!selectedDate) return;
     const statusMap = loadStatus();
     statusMap[selectedDate] = status;
+    saveStatus(statusMap);
+    render();
+    syncStatusButtons();
+    closeSheet();
+  }
+
+  function syncStatusButtons(){
+    if(!selectedDate) return;
+    const st = (loadStatus()[selectedDate] || "planned");
+    const map = {
+      planned: "btnPlanned",
+      done: "btnDone",
+      sick: "btnSick",
+      vab: "btnVab",
+    };
+    for(const k of Object.values(map)){
+      const el = document.getElementById(k);
+      if(el) el.classList.remove("active");
+    }
+    const id = map[st] || "btnPlanned";
+    const active = document.getElementById(id);
+    if(active) active.classList.add("active");
+  }
+
+  function clearDay(){
+    if(!selectedDate) return;
+    if(!confirm("Ta bort pass och status för den här dagen?") ) return;
+    const passMap = loadPassMap();
+    const statusMap = loadStatus();
+    delete passMap[selectedDate];
+    delete statusMap[selectedDate];
+    savePassMap(passMap);
     saveStatus(statusMap);
     render();
     closeSheet();
@@ -429,6 +526,8 @@ function renderCalendar(){
     const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth)
       ? today : new Date(currentYear,currentMonth,1);
     const [ws,we] = weekRangeFor(base);
+    const weekNo = isoWeekNumber(base);
+    document.getElementById("weekMeta").textContent = `v. ${weekNo}`;
 
     const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
     for(let day=1; day<=daysInMonth; day++){
@@ -482,8 +581,10 @@ function renderCalendar(){
     } else if(sumTab==="year"){
       keys = keys.filter(k => k.startsWith(`${currentYear}-`));
     } else {
-      const now = new Date();
-      const [ws,we] = weekRangeFor(now);
+      const today = new Date();
+      const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth)
+        ? today : new Date(currentYear,currentMonth,1);
+      const [ws,we] = weekRangeFor(base);
       keys = keys.filter(k=>{
         const d = new Date(k+"T00:00:00");
         return d>=ws && d<=we;
@@ -498,7 +599,7 @@ function renderCalendar(){
 
       const st = statusMap[k] || "planned";
       if(st==="done") worked += h;
-      if(st==="sick") sickDays += 1;
+      if(st==="sick" || st==="vab") sickDays += 1;
     }
 
     document.getElementById("sumWorked").textContent = fmtH(worked);
@@ -521,6 +622,86 @@ function renderCalendar(){
   // Offline
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  }
+
+  // Settings UI
+  (function initSettings(){
+    const s = loadSettings();
+    const i = document.getElementById("sDefaultBreak");
+    if(i){
+      i.value = Number(s.defaultBreak ?? 30);
+      i.addEventListener("input", () => {
+        const v = Number(i.value || 0);
+        const ns = loadSettings();
+        ns.defaultBreak = Math.max(0, v);
+        saveSettings(ns);
+      });
+    }
+  })();
+
+  function exportData(){
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      passMap: loadPassMap(),
+      statusMap: loadStatus(),
+      settings: loadSettings(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    const key = ymd(new Date());
+    a.href = URL.createObjectURL(blob);
+    a.download = `schema-backup-${key}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+
+  function importData(event){
+    const file = event?.target?.files?.[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const obj = JSON.parse(String(reader.result || "{}"));
+        const passMap = obj.passMap && typeof obj.passMap === "object" ? obj.passMap : null;
+        const statusMap = obj.statusMap && typeof obj.statusMap === "object" ? obj.statusMap : null;
+        const settings = obj.settings && typeof obj.settings === "object" ? obj.settings : {defaultBreak:30};
+        if(!passMap || !statusMap) throw new Error("Ogiltigt backup-format");
+        if(!confirm("Importera backup? Detta skriver över nuvarande data.")) return;
+        savePassMap(passMap);
+        saveStatus(statusMap);
+        saveSettings(settings);
+        // sync settings input
+        const i = document.getElementById("sDefaultBreak");
+        if(i) i.value = Number(settings.defaultBreak ?? 30);
+        render();
+        alert("Import klar!");
+      }catch(e){
+        alert("Kunde inte importera filen (fel format).");
+      }finally{
+        event.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetAll(){
+    if(!confirm("Nollställa ALLT? Detta tar bort alla pass och markeringar.")) return;
+    localStorage.removeItem("passMap");
+    localStorage.removeItem("statusMap");
+    localStorage.removeItem("settings");
+    const i = document.getElementById("sDefaultBreak");
+    if(i) i.value = 30;
+    render();
+  }
+
+  function goToday(){
+    const t = new Date();
+    currentYear = t.getFullYear();
+    currentMonth = t.getMonth();
+    render();
   }
 
   render();

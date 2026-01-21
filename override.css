@@ -55,7 +55,7 @@ body{
   color:#0f172a;
 }
 
-.passline{
+.chip{
   font-size:10px;
   font-weight:900;
   color:#0b3b7a;
@@ -69,10 +69,13 @@ body{
 
 /* Status */
 .day.done{ border-color:#8fd2a0; }
-.day.done .passline{ background:#e7f6ea; color:#1b5e20; }
+.day.done .chip{ background:#e7f6ea; color:#1b5e20; }
 
 .day.sick{ border-color:#f1a3a3; }
-.day.sick .passline{ background:#fde8e8; color:#7f1d1d; }
+.day.sick .chip{ background:#fde8e8; color:#7f1d1d; }
+
+.day.vab{ border-color:#f7c37a; }
+.day.vab .chip{ background:#fff3d6; color:#7a4a00; }
 
 /* Gör så att hela appen inte får konstiga tomma marginaler på desktop */
 @media (min-width: 900px){
@@ -92,15 +95,4 @@ body{
 /* Sheet (dagvy) alltid alignad */
 .sheet{
   max-width: 430px !important;
-}
-.passline{
-  font-size:10px;
-  font-weight:900;
-  color:#0b3b7a;
-  background:#e9f2ff;
-  padding:6px 8px;
-  border-radius:999px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
