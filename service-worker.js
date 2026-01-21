@@ -1,7 +1,7 @@
 // Simple cache-first Service Worker for offline use
 // Bump CACHE_NAME when you change files to force an update.
 
-const CACHE_NAME = "schema-v12";
+const CACHE_NAME = "schema-v13";
 
 // Add any new static files here
 const ASSETS = [
