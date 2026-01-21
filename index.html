@@ -9,7 +9,7 @@
   <style>
     :root{
       --blue:#1976d2; --bg:#f2f4f7; --card:#fff; --text:#0b1220;
-      --muted:#6b7280; --green:#2e7d32; --red:#d32f2f; --amber:#f59e0b;
+      --muted:#6b7280; --green:#2e7d32; --red:#d32f2f;
       --radius:16px;
     }
     *{box-sizing:border-box}
@@ -20,25 +20,28 @@
       border-bottom-left-radius:22px;border-bottom-right-radius:22px;
     }
     .toprow{display:flex;align-items:center;justify-content:space-between}
-    .title{font-weight:800;font-size:20px;letter-spacing:.2px}
+    .title{font-weight:800;font-size:20px}
+    .navarrows{display:flex;gap:10px;align-items:center}
+    .arrow{font-weight:900;opacity:.95;cursor:pointer;user-select:none;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.14)}
     .pillrow{display:flex;gap:14px;margin-top:10px}
     .pill{flex:1;background:rgba(255,255,255,.16);border-radius:14px;padding:10px 12px}
     .pill .label{font-size:12px;opacity:.9}
     .pill .value{font-size:22px;font-weight:800;margin-top:2px}
+    .dow{font-size:12px;color:rgba(255,255,255,.92);display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+    .dow div{text-align:center}
+
     .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(10,20,30,.06)}
     .content{padding:14px 14px 0}
     .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-    .dow{font-size:12px;color:rgba(255,255,255,.9);display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
-    .dow div{text-align:center}
     .day{
       background:#fff;border-radius:14px;padding:10px;min-height:74px;cursor:pointer;
       border:2px solid transparent;
     }
-    .day.muted{opacity:.35}
-    .day .d{font-size:12px;color:var(--muted);font-weight:700}
+    .day.muted{opacity:.35;cursor:default}
+    .day .d{font-size:12px;color:var(--muted);font-weight:800}
     .chip{
       margin-top:6px;font-size:11px;line-height:1.1;padding:5px 6px;border-radius:10px;
-      background:#e9f2ff;color:#0b3b7a;font-weight:700;display:block;
+      background:#e9f2ff;color:#0b3b7a;font-weight:800;display:block;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
     }
     .day.done{border-color:#b7e3bf}
@@ -47,31 +50,35 @@
     .day.sick .chip{background:#fde8e8;color:#7f1d1d}
 
     .sheet{
-      position:fixed;left:0;right:0;bottom:-100%;transition:.25s;
+      position:fixed;left:0;right:0;bottom:-120%;transition:.25s;
       max-width:420px;margin:0 auto;background:#fff;border-top-left-radius:22px;border-top-right-radius:22px;
       box-shadow:0 -20px 60px rgba(0,0,0,.18);padding:10px 14px 16px;
     }
     .sheet.open{bottom:70px}
     .sheethead{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
-    .back{font-weight:800;color:var(--blue);cursor:pointer}
-    .sheettitle{font-weight:900}
+    .back{font-weight:900;color:var(--blue);cursor:pointer}
+    .sheettitle{font-weight:900;text-align:center;flex:1}
     .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef1f5}
-    .row .l{color:var(--muted);font-weight:700}
+    .row .l{color:var(--muted);font-weight:800}
     .row .r{font-weight:900;color:var(--blue)}
+    .input{
+      width:110px;padding:10px 10px;border-radius:12px;border:1px solid #e5e7eb;
+      font-weight:900;color:#0b3b7a;background:#f9fafb;
+    }
     .btn{width:100%;border:0;border-radius:14px;padding:14px 14px;margin-top:10px;font-size:16px;font-weight:900;cursor:pointer}
     .btn.green{background:var(--green);color:#fff}
     .btn.red{background:var(--red);color:#fff}
     .btn.blue{background:var(--blue);color:#fff}
+    .btn.gray{background:#eef1f5;color:#223}
+
     .tabs{display:flex;gap:10px;background:#eef3fb;border-radius:999px;padding:6px}
-    .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:900;color:#335}
+    .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:900;color:#335;cursor:pointer}
     .tab.active{background:var(--blue);color:#fff}
     .sumcard{margin-top:14px;padding:14px}
     .sumtitle{font-weight:900;font-size:18px}
     .badge{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px;border-radius:14px;background:#f6f8fb}
     .badge.green{background:#e7f6ea}
     .badge.red{background:#fde8e8}
-    .badge .left{font-weight:800}
-    .badge .right{font-weight:900}
 
     .nav{
       position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e9edf2;
@@ -79,15 +86,18 @@
     }
     .nav button{border:0;background:transparent;font-weight:900;color:#64748b;cursor:pointer}
     .nav button.active{color:var(--blue)}
-    .hspace{height:10px}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px}
   </style>
 </head>
 <body>
-<div class="app" id="app">
+<div class="app">
   <div class="topbar">
     <div class="toprow">
       <div class="title" id="monthTitle">Februari 2026</div>
-      <div style="opacity:.9;font-weight:800;cursor:pointer" onclick="nextMonth()">›</div>
+      <div class="navarrows">
+        <div class="arrow" onclick="prevMonth()">‹</div>
+        <div class="arrow" onclick="nextMonth()">›</div>
+      </div>
     </div>
     <div class="pillrow">
       <div class="pill">
@@ -109,7 +119,7 @@
       <div class="card" style="padding:12px">
         <div class="grid" id="calGrid"></div>
       </div>
-      <div class="hspace"></div>
+      <div class="hint">Tips: Klicka på en dag för att lägga till/ändra pass och markera Klar/Sjuk.</div>
     </div>
 
     <div id="viewSummary" style="display:none">
@@ -124,12 +134,12 @@
           <div style="font-size:28px;font-weight:900;margin-top:6px" id="sumTotal">0 h</div>
 
           <div class="badge green">
-            <div class="left">✅ Klar/Gjord</div>
-            <div class="right" id="sumDone">0 h</div>
+            <div style="font-weight:900">✅ Klar/Gjord</div>
+            <div style="font-weight:900" id="sumDone">0 h</div>
           </div>
           <div class="badge red">
-            <div class="left">🟥 Sjuk/VAB</div>
-            <div class="right" id="sumSick">0 dagar</div>
+            <div style="font-weight:900">🟥 Sjuk/VAB</div>
+            <div style="font-weight:900" id="sumSick">0 dagar</div>
           </div>
         </div>
       </div>
@@ -138,9 +148,7 @@
     <div id="viewSettings" style="display:none">
       <div class="card sumcard">
         <div class="sumtitle">Inställningar</div>
-        <div style="color:var(--muted);margin-top:8px">
-          (kommer sen) – här kan man t.ex. lägga in schema, standardrast, export/import.
-        </div>
+        <div class="hint">(sen) Export/Import, standardrast, osv.</div>
       </div>
     </div>
   </div>
@@ -150,17 +158,30 @@
 <div class="sheet" id="sheet">
   <div class="sheethead">
     <div class="back" onclick="closeSheet()">‹ Tillbaka</div>
-    <div class="sheettitle" id="sheetTitle">Onsdag, 19 februari</div>
-    <div style="width:56px"></div>
+    <div class="sheettitle" id="sheetTitle">Tisdag, 3 februari</div>
+    <div style="width:60px"></div>
   </div>
 
   <div class="card" style="padding:12px">
-    <div class="row"><div class="l">Start</div><div class="r" id="sStart">07:00</div></div>
-    <div class="row"><div class="l">Slut</div><div class="r" id="sEnd">16:00</div></div>
-    <div class="row"><div class="l">Rast</div><div class="r" id="sBreak">00:30</div></div>
-    <div class="row" style="border-bottom:0"><div class="l">Betalda timmar</div><div class="r" id="sPaid">8 h</div></div>
+    <div class="row">
+      <div class="l">Start</div>
+      <input class="input" id="iStart" type="time" value="07:00" />
+    </div>
+    <div class="row">
+      <div class="l">Slut</div>
+      <input class="input" id="iEnd" type="time" value="16:00" />
+    </div>
+    <div class="row">
+      <div class="l">Rast (min)</div>
+      <input class="input" id="iBreak" type="number" min="0" step="5" value="30" />
+    </div>
+    <div class="row" style="border-bottom:0">
+      <div class="l">Betalda timmar</div>
+      <div class="r" id="paidOut">0 h</div>
+    </div>
   </div>
 
+  <button class="btn gray" onclick="savePass()">💾 Spara pass</button>
   <button class="btn green" onclick="mark('done')">✅ Klar/Gjord</button>
   <button class="btn red" onclick="mark('sick')">🟥 Sjuk / VAB</button>
   <button class="btn blue" onclick="mark('planned')">Återställ till planerad</button>
@@ -174,50 +195,56 @@
 </div>
 
 <script>
-  // ------------------------------
-  // EXEMPEL-SCHEMA (byt sen till hela 2026)
-  // key = YYYY-MM-DD
-  // value = { start:"07:00", end:"16:00", breakMin:30, label:"07:00-16:00" }
-  // ------------------------------
-  const schedule = {
-    "2026-02-02": {start:"16:00", end:"21:00", breakMin:0, label:"16:00–21:00"},
-    "2026-02-03": {start:"14:00", end:"20:00", breakMin:30, label:"14:00–20:00"},
-    "2026-02-04": {start:"07:00", end:"14:00", breakMin:30, label:"07:00–14:00"},
-    "2026-02-11": {start:"07:00", end:"16:00", breakMin:30, label:"07:00–16:00"},
-    "2026-02-19": {start:"07:00", end:"16:00", breakMin:30, label:"07:00–16:00"},
-    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30, label:"14:00–21:00"}
-  };
-
   const monthNames = ["Januari","Februari","Mars","April","Maj","Juni","Juli","Augusti","September","Oktober","November","December"];
   const dayNames = ["Söndag","Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag"];
-
-  // State
-  let currentYear = 2026;
-  let currentMonth = 1; // Feb = 1 (0-based)
-  let selectedDate = null;
-  let sumTab = "week";
-
-  // Storage for status: { "YYYY-MM-DD": "planned|done|sick" }
-  function loadStatus(){ return JSON.parse(localStorage.getItem("statusMap") || "{}"); }
-  function saveStatus(m){ localStorage.setItem("statusMap", JSON.stringify(m)); }
-
   function pad(n){ return String(n).padStart(2,"0"); }
   function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+  // Pass lagras i localStorage så du kan lägga in egna tider
+  // passMap: { "YYYY-MM-DD": {start,end,breakMin} }
+  function loadPassMap(){ return JSON.parse(localStorage.getItem("passMap") || "{}"); }
+  function savePassMap(m){ localStorage.setItem("passMap", JSON.stringify(m)); }
+
+  // statusMap: { "YYYY-MM-DD": "planned|done|sick" }
+  function loadStatus(){ return JSON.parse(localStorage.getItem("statusMap") || "{}"); }
+  function saveStatus(m){ localStorage.setItem("statusMap", JSON.stringify(m)); }
 
   function minutesBetween(start, end){
     const [sh,sm] = start.split(":").map(Number);
     const [eh,em] = end.split(":").map(Number);
     let s = sh*60+sm;
     let e = eh*60+em;
-    if (e < s) e += 24*60; // over midnight
+    if (e < s) e += 24*60; // över midnatt
     return e - s;
   }
-  function paidHoursFor(key){
-    const p = schedule[key];
-    if(!p) return 0;
-    const mins = minutesBetween(p.start, p.end) - (p.breakMin||0);
+  function paidHours(start,end,breakMin){
+    if(!start || !end) return 0;
+    const mins = minutesBetween(start,end) - (breakMin||0);
     return Math.max(0, mins/60);
   }
+
+  let currentYear = 2026;
+  let currentMonth = 1; // Feb
+  let selectedDate = null;
+  let sumTab = "week";
+
+  // Exempel-pass (för att det inte ska vara tomt). Ni kan ändra/spara över dem.
+  const example = {
+    "2026-02-02": {start:"16:00", end:"21:00", breakMin:0},
+    "2026-02-03": {start:"14:00", end:"20:00", breakMin:30},
+    "2026-02-04": {start:"07:00", end:"14:00", breakMin:30},
+    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30},
+  };
+
+  // Se till att exempel finns första gången
+  (function seed(){
+    const m = loadPassMap();
+    let changed = false;
+    for(const k in example){
+      if(!m[k]) { m[k] = example[k]; changed = true; }
+    }
+    if(changed) savePassMap(m);
+  })();
 
   function render(){
     document.getElementById("monthTitle").textContent = `${monthNames[currentMonth]} ${currentYear}`;
@@ -229,24 +256,20 @@
   function renderCalendar(){
     const grid = document.getElementById("calGrid");
     grid.innerHTML = "";
-
     const first = new Date(currentYear, currentMonth, 1);
-    // Monday-based week: JS getDay() Sunday=0. We want Monday=0.
-    const firstDow = (first.getDay() + 6) % 7;
+    const firstDow = (first.getDay() + 6) % 7; // måndag=0
     const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
-
+    const passMap = loadPassMap();
     const statusMap = loadStatus();
 
-    // pad empty cells
     for(let i=0;i<firstDow;i++){
       const cell = document.createElement("div");
       cell.className = "day muted";
-      cell.innerHTML = `<div class="d"></div>`;
       grid.appendChild(cell);
     }
 
     for(let day=1; day<=daysInMonth; day++){
-      const d = new Date(currentYear, currentMonth, day);
+      const d = new Date(currentYear,currentMonth,day);
       const key = ymd(d);
       const st = statusMap[key] || "planned";
 
@@ -255,10 +278,12 @@
       if(st==="done") cell.classList.add("done");
       if(st==="sick") cell.classList.add("sick");
 
-      const pass = schedule[key];
+      const p = passMap[key];
+      const label = p ? `${p.start}–${p.end}` : "";
+
       cell.innerHTML = `
         <div class="d">${day}</div>
-        ${pass ? `<span class="chip">${pass.label}</span>` : ``}
+        ${p ? `<span class="chip">${label}</span>` : ``}
       `;
       cell.onclick = () => openSheet(key);
       grid.appendChild(cell);
@@ -268,18 +293,50 @@
   function openSheet(key){
     selectedDate = key;
     const d = new Date(key+"T00:00:00");
-    document.getElementById("sheetTitle").textContent = `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()].toLowerCase()}`;
-    const p = schedule[key] || {start:"—", end:"—", breakMin:0, label:"—"};
-    document.getElementById("sStart").textContent = p.start;
-    document.getElementById("sEnd").textContent = p.end;
-    document.getElementById("sBreak").textContent = p.breakMin ? `00:${pad(p.breakMin)}` : "00:00";
-    const ph = paidHoursFor(key);
-    document.getElementById("sPaid").textContent = `${ph % 1 === 0 ? ph.toFixed(0) : ph.toFixed(1)} h`;
+    document.getElementById("sheetTitle").textContent =
+      `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()].toLowerCase()}`;
 
+    const passMap = loadPassMap();
+    const p = passMap[key] || {start:"", end:"", breakMin:30};
+
+    document.getElementById("iStart").value = p.start || "";
+    document.getElementById("iEnd").value = p.end || "";
+    document.getElementById("iBreak").value = (p.breakMin ?? 30);
+
+    recalcPaid();
     document.getElementById("sheet").classList.add("open");
   }
-  function closeSheet(){
-    document.getElementById("sheet").classList.remove("open");
+
+  function closeSheet(){ document.getElementById("sheet").classList.remove("open"); }
+
+  function recalcPaid(){
+    const s = document.getElementById("iStart").value;
+    const e = document.getElementById("iEnd").value;
+    const b = Number(document.getElementById("iBreak").value || 0);
+    const h = paidHours(s,e,b);
+    document.getElementById("paidOut").textContent = (h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)) + " h";
+  }
+  document.getElementById("iStart").addEventListener("input", recalcPaid);
+  document.getElementById("iEnd").addEventListener("input", recalcPaid);
+  document.getElementById("iBreak").addEventListener("input", recalcPaid);
+
+  function savePass(){
+    if(!selectedDate) return;
+    const s = document.getElementById("iStart").value;
+    const e = document.getElementById("iEnd").value;
+    const b = Number(document.getElementById("iBreak").value || 0);
+
+    const passMap = loadPassMap();
+    if(!s || !e){
+      // Om man tömmer tiderna: ta bort passet
+      delete passMap[selectedDate];
+    } else {
+      passMap[selectedDate] = {start:s, end:e, breakMin:b};
+    }
+    savePassMap(passMap);
+    renderCalendar();
+    updateTotals();
+    updateSummary();
   }
 
   function mark(status){
@@ -294,9 +351,8 @@
   }
 
   function weekRangeFor(dateObj){
-    // Monday as first day
     const d = new Date(dateObj);
-    const dow = (d.getDay()+6)%7;
+    const dow = (d.getDay()+6)%7; // monday=0
     d.setDate(d.getDate()-dow);
     const start = new Date(d);
     const end = new Date(d); end.setDate(end.getDate()+6);
@@ -305,12 +361,10 @@
 
   function updateTotals(){
     const statusMap = loadStatus();
-
-    // month total (done only)
+    const passMap = loadPassMap();
     let monthTotal = 0;
     let weekTotal = 0;
 
-    // week = current week of today if same month; otherwise week of 1st of month (simple)
     const today = new Date();
     const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth) ? today : new Date(currentYear,currentMonth,1);
     const [ws,we] = weekRangeFor(base);
@@ -321,13 +375,16 @@
       const key = ymd(d);
       const st = statusMap[key] || "planned";
       if(st==="done"){
-        monthTotal += paidHoursFor(key);
-        if(d>=ws && d<=we) weekTotal += paidHoursFor(key);
+        const p = passMap[key];
+        if(p) {
+          const h = paidHours(p.start,p.end,p.breakMin);
+          monthTotal += h;
+          if(d>=ws && d<=we) weekTotal += h;
+        }
       }
     }
-
-    document.getElementById("monthTotal").textContent = `${monthTotal % 1 === 0 ? monthTotal.toFixed(0) : monthTotal.toFixed(1)} h`;
-    document.getElementById("weekTotal").textContent  = `${weekTotal % 1 === 0 ? weekTotal.toFixed(0) : weekTotal.toFixed(1)} h`;
+    document.getElementById("monthTotal").textContent = (monthTotal % 1 === 0 ? monthTotal.toFixed(0) : monthTotal.toFixed(1)) + " h";
+    document.getElementById("weekTotal").textContent  = (weekTotal % 1 === 0 ? weekTotal.toFixed(0) : weekTotal.toFixed(1)) + " h";
   }
 
   function showView(v){
@@ -349,18 +406,18 @@
 
   function updateSummary(){
     const statusMap = loadStatus();
+    const passMap = loadPassMap();
     let doneHours = 0;
     let sickDays = 0;
 
-    const now = new Date();
-    let keys = Object.keys(schedule);
+    let keys = Object.keys(passMap);
 
     if(sumTab==="month"){
       keys = keys.filter(k => k.startsWith(`${currentYear}-${pad(currentMonth+1)}-`));
     } else if(sumTab==="year"){
       keys = keys.filter(k => k.startsWith(`${currentYear}-`));
     } else {
-      // week: current week of today
+      const now = new Date();
       const [ws,we] = weekRangeFor(now);
       keys = keys.filter(k=>{
         const d = new Date(k+"T00:00:00");
@@ -370,14 +427,16 @@
 
     for(const k of keys){
       const st = statusMap[k] || "planned";
-      if(st==="done") doneHours += paidHoursFor(k);
+      if(st==="done"){
+        const p = passMap[k];
+        doneHours += paidHours(p.start,p.end,p.breakMin);
+      }
       if(st==="sick") sickDays += 1;
     }
 
-    const total = doneHours;
-    document.getElementById("sumTotal").textContent = `${total % 1 === 0 ? total.toFixed(0) : total.toFixed(1)} h`;
-    document.getElementById("sumDone").textContent  = `${doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)} h`;
-    document.getElementById("sumSick").textContent  = `${sickDays} dagar`;
+    document.getElementById("sumTotal").textContent = (doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)) + " h";
+    document.getElementById("sumDone").textContent  = (doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)) + " h";
+    document.getElementById("sumSick").textContent  = sickDays + " dagar";
   }
 
   function nextMonth(){
@@ -385,8 +444,13 @@
     if(currentMonth>11){ currentMonth=0; currentYear+=1; }
     render();
   }
+  function prevMonth(){
+    currentMonth -= 1;
+    if(currentMonth<0){ currentMonth=11; currentYear-=1; }
+    render();
+  }
 
-  // Register SW (offline)
+  // Offline (cacha)
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
   }
