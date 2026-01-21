@@ -133,3 +133,16 @@ body{
 
 /* Markera idag lite subtilare */
 .day.today{ box-shadow: inset 0 0 0 2px rgba(25,118,210,.22) !important; }
+
+
+/* --- iPhone: gör rutorna lite större --- */
+@media (max-width: 430px){
+  /* mindre sidpadding så rutorna får mer plats */
+  .content{ padding: 10px 10px 0 !important; }
+
+  /* kortet runt kalendern har inline padding – detta (med !important) vinner */
+  #viewCalendar .card{ padding: 8px !important; }
+
+  /* tajtare mellanrum mellan rutorna */
+  .grid{ gap: 6px !important; }
+}
