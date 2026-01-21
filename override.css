@@ -34,6 +34,14 @@ body{
   padding:10px;
   border:1px solid #eef1f5;
 
+  /* ✅ iOS/Safari fix:
+     Grid-items har default min-width:auto vilket gör att innehåll (t.ex. en chip med nowrap)
+     kan tvinga kolumnen att bli bredare → kalendern “sticker ut” åt höger.
+     min-width:0 låter cellen krympa och ellipsis fungerar korrekt.
+  */
+  min-width: 0;
+  overflow: hidden;
+
   /* ✅ tydlig ruta för varje dag */
   aspect-ratio: 1 / 1;
   min-height: 54px;
@@ -65,6 +73,8 @@ body{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+  max-width: 100%;
+  min-width: 0;
 }
 
 /* Status */
