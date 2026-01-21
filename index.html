@@ -4,8 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Schema</title>
+
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1976d2">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
   <style>
     :root{
       --blue:#1976d2; --bg:#f2f4f7; --card:#fff; --text:#0b1220;
@@ -15,39 +19,79 @@
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
     .app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:78px}
+
     .topbar{
       background:var(--blue);color:#fff;padding:14px 16px 12px;
       border-bottom-left-radius:22px;border-bottom-right-radius:22px;
     }
     .toprow{display:flex;align-items:center;justify-content:space-between}
-    .title{font-weight:800;font-size:20px}
+    .title{font-weight:900;font-size:20px}
     .navarrows{display:flex;gap:10px;align-items:center}
     .arrow{font-weight:900;opacity:.95;cursor:pointer;user-select:none;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.14)}
+
     .pillrow{display:flex;gap:14px;margin-top:10px}
     .pill{flex:1;background:rgba(255,255,255,.16);border-radius:14px;padding:10px 12px}
-    .pill .label{font-size:12px;opacity:.9}
-    .pill .value{font-size:22px;font-weight:800;margin-top:2px}
-    .dow{font-size:12px;color:rgba(255,255,255,.92);display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
-    .dow div{text-align:center}
+    .pill .label{font-size:12px;opacity:.95;font-weight:800}
+    .pill .value{font-size:22px;font-weight:950;margin-top:2px}
+    .pill .sub{font-size:12px;opacity:.95;margin-top:4px}
+
+    .dow{font-size:12px;color:rgba(255,255,255,.92);display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:12px}
+    .dow div{text-align:center;font-weight:800;opacity:.95}
 
     .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(10,20,30,.06)}
     .content{padding:14px 14px 0}
-    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+
+    /* ✅ proffsig kalender-grid */
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:10px;
+    }
     .day{
-      background:#fff;border-radius:14px;padding:10px;min-height:74px;cursor:pointer;
+      background:#fff;
+      border-radius:14px;
+      padding:10px 10px 8px;
+      cursor:pointer;
       border:2px solid transparent;
+
+      aspect-ratio: 1 / 1;
+      min-height: 54px;
+
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
     }
-    .day.muted{opacity:.35;cursor:default}
-    .day .d{font-size:12px;color:var(--muted);font-weight:800}
+    .day.muted{
+      opacity:.25;
+      cursor:default;
+    }
+    .day .d{
+      font-size:12px;
+      color:#334155;
+      font-weight:950;
+      line-height:1;
+    }
     .chip{
-      margin-top:6px;font-size:11px;line-height:1.1;padding:5px 6px;border-radius:10px;
-      background:#e9f2ff;color:#0b3b7a;font-weight:800;display:block;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      margin-top:8px;
+      font-size:10px;
+      line-height:1.1;
+      padding:6px 7px;
+      border-radius:999px;
+      background:#e9f2ff;
+      color:#0b3b7a;
+      font-weight:950;
+      display:block;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
-    .day.done{border-color:#b7e3bf}
-    .day.done .chip{background:#e7f6ea;color:#1b5e20}
-    .day.sick{border-color:#f1b7b7}
-    .day.sick .chip{background:#fde8e8;color:#7f1d1d}
+    .day.done{ border-color:#8fd2a0; }
+    .day.done .chip{ background:#e7f6ea; color:#1b5e20; }
+    .day.sick{ border-color:#f1a3a3; }
+    .day.sick .chip{ background:#fde8e8; color:#7f1d1d; }
+    .day.today{ box-shadow:0 0 0 3px rgba(25,118,210,.18); }
+
+    .hint{font-size:12px;color:var(--muted);margin-top:10px}
 
     .sheet{
       position:fixed;left:0;right:0;bottom:-120%;transition:.25s;
@@ -56,39 +100,40 @@
     }
     .sheet.open{bottom:70px}
     .sheethead{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
-    .back{font-weight:900;color:var(--blue);cursor:pointer}
-    .sheettitle{font-weight:900;text-align:center;flex:1}
+    .back{font-weight:950;color:var(--blue);cursor:pointer}
+    .sheettitle{font-weight:950;text-align:center;flex:1}
     .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef1f5}
-    .row .l{color:var(--muted);font-weight:800}
-    .row .r{font-weight:900;color:var(--blue)}
+    .row .l{color:var(--muted);font-weight:900}
+    .row .r{font-weight:950;color:var(--blue)}
     .input{
-      width:110px;padding:10px 10px;border-radius:12px;border:1px solid #e5e7eb;
-      font-weight:900;color:#0b3b7a;background:#f9fafb;
+      width:120px;padding:10px 10px;border-radius:12px;border:1px solid #e5e7eb;
+      font-weight:950;color:#0b3b7a;background:#f9fafb;
     }
-    .btn{width:100%;border:0;border-radius:14px;padding:14px 14px;margin-top:10px;font-size:16px;font-weight:900;cursor:pointer}
+    .btn{width:100%;border:0;border-radius:14px;padding:14px 14px;margin-top:10px;font-size:16px;font-weight:950;cursor:pointer}
     .btn.green{background:var(--green);color:#fff}
     .btn.red{background:var(--red);color:#fff}
     .btn.blue{background:var(--blue);color:#fff}
     .btn.gray{background:#eef1f5;color:#223}
 
     .tabs{display:flex;gap:10px;background:#eef3fb;border-radius:999px;padding:6px}
-    .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:900;color:#335;cursor:pointer}
+    .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:950;color:#335;cursor:pointer}
     .tab.active{background:var(--blue);color:#fff}
     .sumcard{margin-top:14px;padding:14px}
-    .sumtitle{font-weight:900;font-size:18px}
+    .sumtitle{font-weight:950;font-size:18px}
     .badge{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px;border-radius:14px;background:#f6f8fb}
     .badge.green{background:#e7f6ea}
     .badge.red{background:#fde8e8}
+    .badge.blue{background:#e9f2ff}
 
     .nav{
       position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e9edf2;
       max-width:420px;margin:0 auto;display:flex;gap:8px;justify-content:space-around;padding:10px 10px 14px;
     }
-    .nav button{border:0;background:transparent;font-weight:900;color:#64748b;cursor:pointer}
+    .nav button{border:0;background:transparent;font-weight:950;color:#64748b;cursor:pointer}
     .nav button.active{color:var(--blue)}
-    .hint{font-size:12px;color:var(--muted);margin-top:8px}
   </style>
 </head>
+
 <body>
 <div class="app">
   <div class="topbar">
@@ -99,16 +144,20 @@
         <div class="arrow" onclick="nextMonth()">›</div>
       </div>
     </div>
+
     <div class="pillrow">
       <div class="pill">
         <div class="label">Denna vecka</div>
-        <div class="value" id="weekTotal">0 h</div>
+        <div class="value" id="weekWorked">0 h</div>
+        <div class="sub">Planerat: <strong id="weekPlanned">0 h</strong></div>
       </div>
       <div class="pill">
         <div class="label">Denna månad</div>
-        <div class="value" id="monthTotal">0 h</div>
+        <div class="value" id="monthWorked">0 h</div>
+        <div class="sub">Planerat: <strong id="monthPlanned">0 h</strong></div>
       </div>
     </div>
+
     <div class="dow">
       <div>Mån</div><div>Tis</div><div>Ons</div><div>Tor</div><div>Fre</div><div>Lör</div><div>Sön</div>
     </div>
@@ -129,17 +178,24 @@
           <div class="tab" id="tabMonth" onclick="setSumTab('month')">Månad</div>
           <div class="tab" id="tabYear" onclick="setSumTab('year')">År</div>
         </div>
+
         <div style="margin-top:12px">
-          <div class="sumtitle" id="sumTitle">Totalt jobbade timmar</div>
-          <div style="font-size:28px;font-weight:900;margin-top:6px" id="sumTotal">0 h</div>
+          <div class="sumtitle">Totalt jobbade timmar</div>
+          <div style="font-size:28px;font-weight:950;margin-top:6px" id="sumWorked">0 h</div>
+
+          <div class="badge blue">
+            <div style="font-weight:950">📌 Planerat</div>
+            <div style="font-weight:950" id="sumPlanned">0 h</div>
+          </div>
 
           <div class="badge green">
-            <div style="font-weight:900">✅ Klar/Gjord</div>
-            <div style="font-weight:900" id="sumDone">0 h</div>
+            <div style="font-weight:950">✅ Klar/Gjord</div>
+            <div style="font-weight:950" id="sumDone">0 h</div>
           </div>
+
           <div class="badge red">
-            <div style="font-weight:900">🟥 Sjuk/VAB</div>
-            <div style="font-weight:900" id="sumSick">0 dagar</div>
+            <div style="font-weight:950">🟥 Sjuk/VAB</div>
+            <div style="font-weight:950" id="sumSick">0 dagar</div>
           </div>
         </div>
       </div>
@@ -165,11 +221,11 @@
   <div class="card" style="padding:12px">
     <div class="row">
       <div class="l">Start</div>
-      <input class="input" id="iStart" type="time" value="07:00" />
+      <input class="input" id="iStart" type="time" />
     </div>
     <div class="row">
       <div class="l">Slut</div>
-      <input class="input" id="iEnd" type="time" value="16:00" />
+      <input class="input" id="iEnd" type="time" />
     </div>
     <div class="row">
       <div class="l">Rast (min)</div>
@@ -200,12 +256,8 @@
   function pad(n){ return String(n).padStart(2,"0"); }
   function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 
-  // Pass lagras i localStorage så du kan lägga in egna tider
-  // passMap: { "YYYY-MM-DD": {start,end,breakMin} }
   function loadPassMap(){ return JSON.parse(localStorage.getItem("passMap") || "{}"); }
   function savePassMap(m){ localStorage.setItem("passMap", JSON.stringify(m)); }
-
-  // statusMap: { "YYYY-MM-DD": "planned|done|sick" }
   function loadStatus(){ return JSON.parse(localStorage.getItem("statusMap") || "{}"); }
   function saveStatus(m){ localStorage.setItem("statusMap", JSON.stringify(m)); }
 
@@ -214,7 +266,7 @@
     const [eh,em] = end.split(":").map(Number);
     let s = sh*60+sm;
     let e = eh*60+em;
-    if (e < s) e += 24*60; // över midnatt
+    if (e < s) e += 24*60;
     return e - s;
   }
   function paidHours(start,end,breakMin){
@@ -222,21 +274,20 @@
     const mins = minutesBetween(start,end) - (breakMin||0);
     return Math.max(0, mins/60);
   }
+  function fmtH(h){ return (h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)) + " h"; }
 
   let currentYear = 2026;
   let currentMonth = 1; // Feb
   let selectedDate = null;
   let sumTab = "week";
 
-  // Exempel-pass (för att det inte ska vara tomt). Ni kan ändra/spara över dem.
+  // Exempel-pass (kan ersättas av er manuellt / import senare)
   const example = {
     "2026-02-02": {start:"16:00", end:"21:00", breakMin:0},
     "2026-02-03": {start:"14:00", end:"20:00", breakMin:30},
     "2026-02-04": {start:"07:00", end:"14:00", breakMin:30},
-    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30},
+    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30}
   };
-
-  // Se till att exempel finns första gången
   (function seed(){
     const m = loadPassMap();
     let changed = false;
@@ -246,44 +297,62 @@
     if(changed) savePassMap(m);
   })();
 
+  function weekRangeFor(dateObj){
+    const d = new Date(dateObj);
+    const dow = (d.getDay()+6)%7; // monday=0
+    d.setDate(d.getDate()-dow);
+    const start = new Date(d);
+    const end = new Date(d); end.setDate(end.getDate()+6);
+    return [start,end];
+  }
+
   function render(){
     document.getElementById("monthTitle").textContent = `${monthNames[currentMonth]} ${currentYear}`;
     renderCalendar();
-    updateTotals();
+    updateTopTotals();
     updateSummary();
   }
 
   function renderCalendar(){
     const grid = document.getElementById("calGrid");
     grid.innerHTML = "";
+
     const first = new Date(currentYear, currentMonth, 1);
-    const firstDow = (first.getDay() + 6) % 7; // måndag=0
+    const firstDow = (first.getDay() + 6) % 7;
     const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+
     const passMap = loadPassMap();
     const statusMap = loadStatus();
+    const totalCells = 42;
 
-    for(let i=0;i<firstDow;i++){
-      const cell = document.createElement("div");
-      cell.className = "day muted";
-      grid.appendChild(cell);
-    }
-
-    for(let day=1; day<=daysInMonth; day++){
-      const d = new Date(currentYear,currentMonth,day);
-      const key = ymd(d);
-      const st = statusMap[key] || "planned";
-
+    for(let idx=0; idx<totalCells; idx++){
       const cell = document.createElement("div");
       cell.className = "day";
+
+      const dayNum = idx - firstDow + 1;
+      if(dayNum < 1 || dayNum > daysInMonth){
+        cell.classList.add("muted");
+        grid.appendChild(cell);
+        continue;
+      }
+
+      const d = new Date(currentYear, currentMonth, dayNum);
+      const key = ymd(d);
+      const st = statusMap[key] || "planned";
       if(st==="done") cell.classList.add("done");
       if(st==="sick") cell.classList.add("sick");
 
+      const today = new Date();
+      if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===dayNum){
+        cell.classList.add("today");
+      }
+
       const p = passMap[key];
-      const label = p ? `${p.start}–${p.end}` : "";
+      const label = p ? `${p.start}–${p.end}` : "—";
 
       cell.innerHTML = `
-        <div class="d">${day}</div>
-        ${p ? `<span class="chip">${label}</span>` : ``}
+        <div class="d">${dayNum}</div>
+        <span class="chip" style="${p ? "" : "visibility:hidden"}">${label}</span>
       `;
       cell.onclick = () => openSheet(key);
       grid.appendChild(cell);
@@ -306,15 +375,13 @@
     recalcPaid();
     document.getElementById("sheet").classList.add("open");
   }
-
   function closeSheet(){ document.getElementById("sheet").classList.remove("open"); }
 
   function recalcPaid(){
     const s = document.getElementById("iStart").value;
     const e = document.getElementById("iEnd").value;
     const b = Number(document.getElementById("iBreak").value || 0);
-    const h = paidHours(s,e,b);
-    document.getElementById("paidOut").textContent = (h % 1 === 0 ? h.toFixed(0) : h.toFixed(1)) + " h";
+    document.getElementById("paidOut").textContent = fmtH(paidHours(s,e,b));
   }
   document.getElementById("iStart").addEventListener("input", recalcPaid);
   document.getElementById("iEnd").addEventListener("input", recalcPaid);
@@ -327,16 +394,11 @@
     const b = Number(document.getElementById("iBreak").value || 0);
 
     const passMap = loadPassMap();
-    if(!s || !e){
-      // Om man tömmer tiderna: ta bort passet
-      delete passMap[selectedDate];
-    } else {
-      passMap[selectedDate] = {start:s, end:e, breakMin:b};
-    }
+    if(!s || !e) delete passMap[selectedDate];
+    else passMap[selectedDate] = {start:s, end:e, breakMin:b};
     savePassMap(passMap);
-    renderCalendar();
-    updateTotals();
-    updateSummary();
+
+    render();
   }
 
   function mark(status){
@@ -344,47 +406,45 @@
     const statusMap = loadStatus();
     statusMap[selectedDate] = status;
     saveStatus(statusMap);
-    renderCalendar();
-    updateTotals();
-    updateSummary();
+    render();
     closeSheet();
   }
 
-  function weekRangeFor(dateObj){
-    const d = new Date(dateObj);
-    const dow = (d.getDay()+6)%7; // monday=0
-    d.setDate(d.getDate()-dow);
-    const start = new Date(d);
-    const end = new Date(d); end.setDate(end.getDate()+6);
-    return [start,end];
-  }
-
-  function updateTotals(){
+  // ✅ Top: Jobbat + Planerat (vecka/månad)
+  function updateTopTotals(){
     const statusMap = loadStatus();
     const passMap = loadPassMap();
-    let monthTotal = 0;
-    let weekTotal = 0;
+
+    let monthWorked = 0, monthPlanned = 0;
+    let weekWorked = 0, weekPlanned = 0;
 
     const today = new Date();
-    const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth) ? today : new Date(currentYear,currentMonth,1);
+    const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth)
+      ? today : new Date(currentYear,currentMonth,1);
     const [ws,we] = weekRangeFor(base);
 
     const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
     for(let day=1; day<=daysInMonth; day++){
       const d = new Date(currentYear,currentMonth,day);
       const key = ymd(d);
+      const p = passMap[key];
+      if(!p) continue;
+
+      const h = paidHours(p.start,p.end,p.breakMin);
+      monthPlanned += h;
+      if(d>=ws && d<=we) weekPlanned += h;
+
       const st = statusMap[key] || "planned";
       if(st==="done"){
-        const p = passMap[key];
-        if(p) {
-          const h = paidHours(p.start,p.end,p.breakMin);
-          monthTotal += h;
-          if(d>=ws && d<=we) weekTotal += h;
-        }
+        monthWorked += h;
+        if(d>=ws && d<=we) weekWorked += h;
       }
     }
-    document.getElementById("monthTotal").textContent = (monthTotal % 1 === 0 ? monthTotal.toFixed(0) : monthTotal.toFixed(1)) + " h";
-    document.getElementById("weekTotal").textContent  = (weekTotal % 1 === 0 ? weekTotal.toFixed(0) : weekTotal.toFixed(1)) + " h";
+
+    document.getElementById("weekWorked").textContent = fmtH(weekWorked);
+    document.getElementById("weekPlanned").textContent = fmtH(weekPlanned);
+    document.getElementById("monthWorked").textContent = fmtH(monthWorked);
+    document.getElementById("monthPlanned").textContent = fmtH(monthPlanned);
   }
 
   function showView(v){
@@ -404,14 +464,12 @@
     updateSummary();
   }
 
+  // ✅ Summary: Planerat + Jobbat + Sjuk/VAB
   function updateSummary(){
     const statusMap = loadStatus();
     const passMap = loadPassMap();
-    let doneHours = 0;
-    let sickDays = 0;
 
     let keys = Object.keys(passMap);
-
     if(sumTab==="month"){
       keys = keys.filter(k => k.startsWith(`${currentYear}-${pad(currentMonth+1)}-`));
     } else if(sumTab==="year"){
@@ -425,18 +483,21 @@
       });
     }
 
+    let planned = 0, worked = 0, sickDays = 0;
     for(const k of keys){
+      const p = passMap[k];
+      const h = paidHours(p.start,p.end,p.breakMin);
+      planned += h;
+
       const st = statusMap[k] || "planned";
-      if(st==="done"){
-        const p = passMap[k];
-        doneHours += paidHours(p.start,p.end,p.breakMin);
-      }
+      if(st==="done") worked += h;
       if(st==="sick") sickDays += 1;
     }
 
-    document.getElementById("sumTotal").textContent = (doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)) + " h";
-    document.getElementById("sumDone").textContent  = (doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)) + " h";
-    document.getElementById("sumSick").textContent  = sickDays + " dagar";
+    document.getElementById("sumWorked").textContent = fmtH(worked);
+    document.getElementById("sumPlanned").textContent = fmtH(planned);
+    document.getElementById("sumDone").textContent = fmtH(worked);
+    document.getElementById("sumSick").textContent = `${sickDays} dagar`;
   }
 
   function nextMonth(){
@@ -450,7 +511,7 @@
     render();
   }
 
-  // Offline (cacha)
+  // Offline
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
   }
