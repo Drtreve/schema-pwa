@@ -313,51 +313,54 @@
     updateSummary();
   }
 
-  function renderCalendar(){
-    const grid = document.getElementById("calGrid");
-    grid.innerHTML = "";
+function renderCalendar(){
+  const grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
 
-    const first = new Date(currentYear, currentMonth, 1);
-    const firstDow = (first.getDay() + 6) % 7;
-    const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+  const first = new Date(currentYear, currentMonth, 1);
+  const firstDow = (first.getDay() + 6) % 7; // mån=0
+  const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
 
-    const passMap = loadPassMap();
-    const statusMap = loadStatus();
-    const totalCells = 42;
+  const passMap = loadPassMap();
+  const statusMap = loadStatus();
 
-    for(let idx=0; idx<totalCells; idx++){
-      const cell = document.createElement("div");
-      cell.className = "day";
+  // ✅ alltid 42 rutor
+  const totalCells = 42;
 
-      const dayNum = idx - firstDow + 1;
-      if(dayNum < 1 || dayNum > daysInMonth){
-        cell.classList.add("muted");
-        grid.appendChild(cell);
-        continue;
-      }
+  for(let idx=0; idx<totalCells; idx++){
+    const cell = document.createElement("div");
+    cell.className = "day";
 
-      const d = new Date(currentYear, currentMonth, dayNum);
-      const key = ymd(d);
-      const st = statusMap[key] || "planned";
-      if(st==="done") cell.classList.add("done");
-      if(st==="sick") cell.classList.add("sick");
+    const dayNum = idx - firstDow + 1;
 
-      const today = new Date();
-      if(today.getFullYear()===currentYear && today.getMonth()===currentMonth && today.getDate()===dayNum){
-        cell.classList.add("today");
-      }
-
-      const p = passMap[key];
-      const label = p ? `${p.start}–${p.end}` : "—";
-
-      cell.innerHTML = `
-        <div class="d">${dayNum}</div>
-        <span class="chip" style="${p ? "" : "visibility:hidden"}">${label}</span>
-      `;
-      cell.onclick = () => openSheet(key);
+    // tomma rutor (före/efter månaden) får egen ruta men inget datum
+    if(dayNum < 1 || dayNum > daysInMonth){
+      cell.classList.add("muted");
+      cell.innerHTML = `<div class="d"></div><div></div>`;
       grid.appendChild(cell);
+      continue;
     }
+
+    const d = new Date(currentYear, currentMonth, dayNum);
+    const key = ymd(d);
+
+    const st = statusMap[key] || "planned";
+    if(st==="done") cell.classList.add("done");
+    if(st==="sick") cell.classList.add("sick");
+
+    const p = passMap[key];
+    const passText = p ? `${p.start}–${p.end}` : "";
+
+    cell.innerHTML = `
+      <div class="d">${dayNum}</div>
+      ${p ? `<div class="passline">${passText}</div>` : `<div></div>`}
+    `;
+
+    cell.onclick = () => openSheet(key);
+    grid.appendChild(cell);
   }
+}
+
 
   function openSheet(key){
     selectedDate = key;
