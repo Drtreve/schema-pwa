@@ -58,7 +58,11 @@
       border-radius:14px;
       padding:10px 10px 8px;
       cursor:pointer;
-      border:2px solid transparent;
+      /*
+        Om bordern är transparent och bakgrunden är vit (samma som kortet)
+        ser det ut som att dagar "försvinner". En svag border gör rutorna tydliga.
+      */
+      border:1px solid #e5e7eb;
 
       aspect-ratio: 1 / 1;
       min-height: 54px;
@@ -68,8 +72,10 @@
       justify-content:flex-start;
     }
     .day.muted{
-      opacity:.25;
+      opacity:1;
       cursor:default;
+      background:#f6f7fb;
+      border-color:#eef1f5;
     }
     .day .d{
       font-size:12px;
