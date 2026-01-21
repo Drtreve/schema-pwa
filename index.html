@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schema</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1976d2">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    body { font-family: system-ui; margin: 0; background:#f5f5f5; }
+    header { background:#1976d2; color:white; padding:1rem; text-align:center; }
+    .day { background:white; margin:1rem; padding:1rem; border-radius:12px; }
+    button { width:100%; padding:1rem; margin-top:.5rem; font-size:1rem; border:none; border-radius:8px; }
+    .done { background:#4caf50; color:white; }
+    .sick { background:#f44336; color:white; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2>Idag</h2>
+  <div id="total"></div>
+</header>
+
+<div class="day">
+  <p><strong>Pass:</strong> 07:00 – 16:00</p>
+  <p><strong>Rast:</strong> 30 min</p>
+  <button class="done" onclick="setStatus('done')">✅ Klar / Gjord</button>
+  <button class="sick" onclick="setStatus('sick')">🟥 Sjuk / VAB</button>
+</div>
+
+<script>
+  const HOURS = 8;
+  function setStatus(status) {
+    if (status === 'done') {
+      localStorage.setItem('hours', HOURS);
+    } else {
+      localStorage.setItem('hours', 0);
+    }
+    update();
+  }
+  function update() {
+    const h = localStorage.getItem('hours') || 0;
+    document.getElementById('total').innerText =
+      `Jobbade timmar denna månad: ${h} h`;
+  }
+  update();
+</script>
+
+</body>
+</html>
