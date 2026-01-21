@@ -1,52 +1,397 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>Schema</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1976d2">
-  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
-    body { font-family: system-ui; margin: 0; background:#f5f5f5; }
-    header { background:#1976d2; color:white; padding:1rem; text-align:center; }
-    .day { background:white; margin:1rem; padding:1rem; border-radius:12px; }
-    button { width:100%; padding:1rem; margin-top:.5rem; font-size:1rem; border:none; border-radius:8px; }
-    .done { background:#4caf50; color:white; }
-    .sick { background:#f44336; color:white; }
+    :root{
+      --blue:#1976d2; --bg:#f2f4f7; --card:#fff; --text:#0b1220;
+      --muted:#6b7280; --green:#2e7d32; --red:#d32f2f; --amber:#f59e0b;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    .app{max-width:420px;margin:0 auto;min-height:100vh;background:var(--bg);padding-bottom:78px}
+    .topbar{
+      background:var(--blue);color:#fff;padding:14px 16px 12px;
+      border-bottom-left-radius:22px;border-bottom-right-radius:22px;
+    }
+    .toprow{display:flex;align-items:center;justify-content:space-between}
+    .title{font-weight:800;font-size:20px;letter-spacing:.2px}
+    .pillrow{display:flex;gap:14px;margin-top:10px}
+    .pill{flex:1;background:rgba(255,255,255,.16);border-radius:14px;padding:10px 12px}
+    .pill .label{font-size:12px;opacity:.9}
+    .pill .value{font-size:22px;font-weight:800;margin-top:2px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(10,20,30,.06)}
+    .content{padding:14px 14px 0}
+    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .dow{font-size:12px;color:rgba(255,255,255,.9);display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+    .dow div{text-align:center}
+    .day{
+      background:#fff;border-radius:14px;padding:10px;min-height:74px;cursor:pointer;
+      border:2px solid transparent;
+    }
+    .day.muted{opacity:.35}
+    .day .d{font-size:12px;color:var(--muted);font-weight:700}
+    .chip{
+      margin-top:6px;font-size:11px;line-height:1.1;padding:5px 6px;border-radius:10px;
+      background:#e9f2ff;color:#0b3b7a;font-weight:700;display:block;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .day.done{border-color:#b7e3bf}
+    .day.done .chip{background:#e7f6ea;color:#1b5e20}
+    .day.sick{border-color:#f1b7b7}
+    .day.sick .chip{background:#fde8e8;color:#7f1d1d}
+
+    .sheet{
+      position:fixed;left:0;right:0;bottom:-100%;transition:.25s;
+      max-width:420px;margin:0 auto;background:#fff;border-top-left-radius:22px;border-top-right-radius:22px;
+      box-shadow:0 -20px 60px rgba(0,0,0,.18);padding:10px 14px 16px;
+    }
+    .sheet.open{bottom:70px}
+    .sheethead{display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px}
+    .back{font-weight:800;color:var(--blue);cursor:pointer}
+    .sheettitle{font-weight:900}
+    .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef1f5}
+    .row .l{color:var(--muted);font-weight:700}
+    .row .r{font-weight:900;color:var(--blue)}
+    .btn{width:100%;border:0;border-radius:14px;padding:14px 14px;margin-top:10px;font-size:16px;font-weight:900;cursor:pointer}
+    .btn.green{background:var(--green);color:#fff}
+    .btn.red{background:var(--red);color:#fff}
+    .btn.blue{background:var(--blue);color:#fff}
+    .tabs{display:flex;gap:10px;background:#eef3fb;border-radius:999px;padding:6px}
+    .tab{flex:1;text-align:center;padding:8px 10px;border-radius:999px;font-weight:900;color:#335}
+    .tab.active{background:var(--blue);color:#fff}
+    .sumcard{margin-top:14px;padding:14px}
+    .sumtitle{font-weight:900;font-size:18px}
+    .badge{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:10px;border-radius:14px;background:#f6f8fb}
+    .badge.green{background:#e7f6ea}
+    .badge.red{background:#fde8e8}
+    .badge .left{font-weight:800}
+    .badge .right{font-weight:900}
+
+    .nav{
+      position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e9edf2;
+      max-width:420px;margin:0 auto;display:flex;gap:8px;justify-content:space-around;padding:10px 10px 14px;
+    }
+    .nav button{border:0;background:transparent;font-weight:900;color:#64748b;cursor:pointer}
+    .nav button.active{color:var(--blue)}
+    .hspace{height:10px}
   </style>
 </head>
 <body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="toprow">
+      <div class="title" id="monthTitle">Februari 2026</div>
+      <div style="opacity:.9;font-weight:800;cursor:pointer" onclick="nextMonth()">›</div>
+    </div>
+    <div class="pillrow">
+      <div class="pill">
+        <div class="label">Denna vecka</div>
+        <div class="value" id="weekTotal">0 h</div>
+      </div>
+      <div class="pill">
+        <div class="label">Denna månad</div>
+        <div class="value" id="monthTotal">0 h</div>
+      </div>
+    </div>
+    <div class="dow">
+      <div>Mån</div><div>Tis</div><div>Ons</div><div>Tor</div><div>Fre</div><div>Lör</div><div>Sön</div>
+    </div>
+  </div>
 
-<header>
-  <h2>Idag</h2>
-  <div id="total"></div>
-</header>
+  <div class="content">
+    <div id="viewCalendar">
+      <div class="card" style="padding:12px">
+        <div class="grid" id="calGrid"></div>
+      </div>
+      <div class="hspace"></div>
+    </div>
 
-<div class="day">
-  <p><strong>Pass:</strong> 07:00 – 16:00</p>
-  <p><strong>Rast:</strong> 30 min</p>
-  <button class="done" onclick="setStatus('done')">✅ Klar / Gjord</button>
-  <button class="sick" onclick="setStatus('sick')">🟥 Sjuk / VAB</button>
+    <div id="viewSummary" style="display:none">
+      <div class="card sumcard">
+        <div class="tabs">
+          <div class="tab active" id="tabWeek" onclick="setSumTab('week')">Vecka</div>
+          <div class="tab" id="tabMonth" onclick="setSumTab('month')">Månad</div>
+          <div class="tab" id="tabYear" onclick="setSumTab('year')">År</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="sumtitle" id="sumTitle">Totalt jobbade timmar</div>
+          <div style="font-size:28px;font-weight:900;margin-top:6px" id="sumTotal">0 h</div>
+
+          <div class="badge green">
+            <div class="left">✅ Klar/Gjord</div>
+            <div class="right" id="sumDone">0 h</div>
+          </div>
+          <div class="badge red">
+            <div class="left">🟥 Sjuk/VAB</div>
+            <div class="right" id="sumSick">0 dagar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewSettings" style="display:none">
+      <div class="card sumcard">
+        <div class="sumtitle">Inställningar</div>
+        <div style="color:var(--muted);margin-top:8px">
+          (kommer sen) – här kan man t.ex. lägga in schema, standardrast, export/import.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Day sheet -->
+<div class="sheet" id="sheet">
+  <div class="sheethead">
+    <div class="back" onclick="closeSheet()">‹ Tillbaka</div>
+    <div class="sheettitle" id="sheetTitle">Onsdag, 19 februari</div>
+    <div style="width:56px"></div>
+  </div>
+
+  <div class="card" style="padding:12px">
+    <div class="row"><div class="l">Start</div><div class="r" id="sStart">07:00</div></div>
+    <div class="row"><div class="l">Slut</div><div class="r" id="sEnd">16:00</div></div>
+    <div class="row"><div class="l">Rast</div><div class="r" id="sBreak">00:30</div></div>
+    <div class="row" style="border-bottom:0"><div class="l">Betalda timmar</div><div class="r" id="sPaid">8 h</div></div>
+  </div>
+
+  <button class="btn green" onclick="mark('done')">✅ Klar/Gjord</button>
+  <button class="btn red" onclick="mark('sick')">🟥 Sjuk / VAB</button>
+  <button class="btn blue" onclick="mark('planned')">Återställ till planerad</button>
+</div>
+
+<!-- Bottom nav -->
+<div class="nav">
+  <button id="navCal" class="active" onclick="showView('calendar')">Kalender</button>
+  <button id="navSum" onclick="showView('summary')">Summering</button>
+  <button id="navSet" onclick="showView('settings')">Inställningar</button>
 </div>
 
 <script>
-  const HOURS = 8;
-  function setStatus(status) {
-    if (status === 'done') {
-      localStorage.setItem('hours', HOURS);
-    } else {
-      localStorage.setItem('hours', 0);
-    }
-    update();
-  }
-  function update() {
-    const h = localStorage.getItem('hours') || 0;
-    document.getElementById('total').innerText =
-      `Jobbade timmar denna månad: ${h} h`;
-  }
-  update();
-</script>
+  // ------------------------------
+  // EXEMPEL-SCHEMA (byt sen till hela 2026)
+  // key = YYYY-MM-DD
+  // value = { start:"07:00", end:"16:00", breakMin:30, label:"07:00-16:00" }
+  // ------------------------------
+  const schedule = {
+    "2026-02-02": {start:"16:00", end:"21:00", breakMin:0, label:"16:00–21:00"},
+    "2026-02-03": {start:"14:00", end:"20:00", breakMin:30, label:"14:00–20:00"},
+    "2026-02-04": {start:"07:00", end:"14:00", breakMin:30, label:"07:00–14:00"},
+    "2026-02-11": {start:"07:00", end:"16:00", breakMin:30, label:"07:00–16:00"},
+    "2026-02-19": {start:"07:00", end:"16:00", breakMin:30, label:"07:00–16:00"},
+    "2026-02-21": {start:"14:00", end:"21:00", breakMin:30, label:"14:00–21:00"}
+  };
 
+  const monthNames = ["Januari","Februari","Mars","April","Maj","Juni","Juli","Augusti","September","Oktober","November","December"];
+  const dayNames = ["Söndag","Måndag","Tisdag","Onsdag","Torsdag","Fredag","Lördag"];
+
+  // State
+  let currentYear = 2026;
+  let currentMonth = 1; // Feb = 1 (0-based)
+  let selectedDate = null;
+  let sumTab = "week";
+
+  // Storage for status: { "YYYY-MM-DD": "planned|done|sick" }
+  function loadStatus(){ return JSON.parse(localStorage.getItem("statusMap") || "{}"); }
+  function saveStatus(m){ localStorage.setItem("statusMap", JSON.stringify(m)); }
+
+  function pad(n){ return String(n).padStart(2,"0"); }
+  function ymd(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+  function minutesBetween(start, end){
+    const [sh,sm] = start.split(":").map(Number);
+    const [eh,em] = end.split(":").map(Number);
+    let s = sh*60+sm;
+    let e = eh*60+em;
+    if (e < s) e += 24*60; // over midnight
+    return e - s;
+  }
+  function paidHoursFor(key){
+    const p = schedule[key];
+    if(!p) return 0;
+    const mins = minutesBetween(p.start, p.end) - (p.breakMin||0);
+    return Math.max(0, mins/60);
+  }
+
+  function render(){
+    document.getElementById("monthTitle").textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    renderCalendar();
+    updateTotals();
+    updateSummary();
+  }
+
+  function renderCalendar(){
+    const grid = document.getElementById("calGrid");
+    grid.innerHTML = "";
+
+    const first = new Date(currentYear, currentMonth, 1);
+    // Monday-based week: JS getDay() Sunday=0. We want Monday=0.
+    const firstDow = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+
+    const statusMap = loadStatus();
+
+    // pad empty cells
+    for(let i=0;i<firstDow;i++){
+      const cell = document.createElement("div");
+      cell.className = "day muted";
+      cell.innerHTML = `<div class="d"></div>`;
+      grid.appendChild(cell);
+    }
+
+    for(let day=1; day<=daysInMonth; day++){
+      const d = new Date(currentYear, currentMonth, day);
+      const key = ymd(d);
+      const st = statusMap[key] || "planned";
+
+      const cell = document.createElement("div");
+      cell.className = "day";
+      if(st==="done") cell.classList.add("done");
+      if(st==="sick") cell.classList.add("sick");
+
+      const pass = schedule[key];
+      cell.innerHTML = `
+        <div class="d">${day}</div>
+        ${pass ? `<span class="chip">${pass.label}</span>` : ``}
+      `;
+      cell.onclick = () => openSheet(key);
+      grid.appendChild(cell);
+    }
+  }
+
+  function openSheet(key){
+    selectedDate = key;
+    const d = new Date(key+"T00:00:00");
+    document.getElementById("sheetTitle").textContent = `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()].toLowerCase()}`;
+    const p = schedule[key] || {start:"—", end:"—", breakMin:0, label:"—"};
+    document.getElementById("sStart").textContent = p.start;
+    document.getElementById("sEnd").textContent = p.end;
+    document.getElementById("sBreak").textContent = p.breakMin ? `00:${pad(p.breakMin)}` : "00:00";
+    const ph = paidHoursFor(key);
+    document.getElementById("sPaid").textContent = `${ph % 1 === 0 ? ph.toFixed(0) : ph.toFixed(1)} h`;
+
+    document.getElementById("sheet").classList.add("open");
+  }
+  function closeSheet(){
+    document.getElementById("sheet").classList.remove("open");
+  }
+
+  function mark(status){
+    if(!selectedDate) return;
+    const statusMap = loadStatus();
+    statusMap[selectedDate] = status;
+    saveStatus(statusMap);
+    renderCalendar();
+    updateTotals();
+    updateSummary();
+    closeSheet();
+  }
+
+  function weekRangeFor(dateObj){
+    // Monday as first day
+    const d = new Date(dateObj);
+    const dow = (d.getDay()+6)%7;
+    d.setDate(d.getDate()-dow);
+    const start = new Date(d);
+    const end = new Date(d); end.setDate(end.getDate()+6);
+    return [start,end];
+  }
+
+  function updateTotals(){
+    const statusMap = loadStatus();
+
+    // month total (done only)
+    let monthTotal = 0;
+    let weekTotal = 0;
+
+    // week = current week of today if same month; otherwise week of 1st of month (simple)
+    const today = new Date();
+    const base = (today.getFullYear()===currentYear && today.getMonth()===currentMonth) ? today : new Date(currentYear,currentMonth,1);
+    const [ws,we] = weekRangeFor(base);
+
+    const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+    for(let day=1; day<=daysInMonth; day++){
+      const d = new Date(currentYear,currentMonth,day);
+      const key = ymd(d);
+      const st = statusMap[key] || "planned";
+      if(st==="done"){
+        monthTotal += paidHoursFor(key);
+        if(d>=ws && d<=we) weekTotal += paidHoursFor(key);
+      }
+    }
+
+    document.getElementById("monthTotal").textContent = `${monthTotal % 1 === 0 ? monthTotal.toFixed(0) : monthTotal.toFixed(1)} h`;
+    document.getElementById("weekTotal").textContent  = `${weekTotal % 1 === 0 ? weekTotal.toFixed(0) : weekTotal.toFixed(1)} h`;
+  }
+
+  function showView(v){
+    document.getElementById("viewCalendar").style.display = (v==="calendar") ? "" : "none";
+    document.getElementById("viewSummary").style.display  = (v==="summary") ? "" : "none";
+    document.getElementById("viewSettings").style.display = (v==="settings") ? "" : "none";
+    document.getElementById("navCal").classList.toggle("active", v==="calendar");
+    document.getElementById("navSum").classList.toggle("active", v==="summary");
+    document.getElementById("navSet").classList.toggle("active", v==="settings");
+  }
+
+  function setSumTab(t){
+    sumTab = t;
+    document.getElementById("tabWeek").classList.toggle("active", t==="week");
+    document.getElementById("tabMonth").classList.toggle("active", t==="month");
+    document.getElementById("tabYear").classList.toggle("active", t==="year");
+    updateSummary();
+  }
+
+  function updateSummary(){
+    const statusMap = loadStatus();
+    let doneHours = 0;
+    let sickDays = 0;
+
+    const now = new Date();
+    let keys = Object.keys(schedule);
+
+    if(sumTab==="month"){
+      keys = keys.filter(k => k.startsWith(`${currentYear}-${pad(currentMonth+1)}-`));
+    } else if(sumTab==="year"){
+      keys = keys.filter(k => k.startsWith(`${currentYear}-`));
+    } else {
+      // week: current week of today
+      const [ws,we] = weekRangeFor(now);
+      keys = keys.filter(k=>{
+        const d = new Date(k+"T00:00:00");
+        return d>=ws && d<=we;
+      });
+    }
+
+    for(const k of keys){
+      const st = statusMap[k] || "planned";
+      if(st==="done") doneHours += paidHoursFor(k);
+      if(st==="sick") sickDays += 1;
+    }
+
+    const total = doneHours;
+    document.getElementById("sumTotal").textContent = `${total % 1 === 0 ? total.toFixed(0) : total.toFixed(1)} h`;
+    document.getElementById("sumDone").textContent  = `${doneHours % 1 === 0 ? doneHours.toFixed(0) : doneHours.toFixed(1)} h`;
+    document.getElementById("sumSick").textContent  = `${sickDays} dagar`;
+  }
+
+  function nextMonth(){
+    currentMonth += 1;
+    if(currentMonth>11){ currentMonth=0; currentYear+=1; }
+    render();
+  }
+
+  // Register SW (offline)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+  }
+
+  render();
+</script>
 </body>
 </html>
